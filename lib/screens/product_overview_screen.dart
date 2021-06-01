@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shop_app/widgets/app_drawer.dart';
 class ProductOverviewScreen extends StatefulWidget {
   @override
   _ProductOverviewScreenState createState() => _ProductOverviewScreenState();
@@ -13,6 +15,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       ),
       body: Center(
       ),
+      drawer: AppDrawer(),
     );
   }
 }

@@ -40,12 +40,13 @@ class Auth with ChangeNotifier {
           }));
       final responseData = json.decode(res.body);
       if (responseData['error'] != null) {
-        HttpException(responseData['error']['message']);
+       throw  HttpException(responseData['error']['message']);
       }
       _token = responseData['idToken'];
       _userId = responseData['localId'];
       _expiryDate = DateTime.now()
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
+      _autoLogout();
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       final userData = json.encode({
@@ -72,6 +73,26 @@ class Auth with ChangeNotifier {
     _userId = extractedData['userid'];
     _expiryDate = expiryDate;
     notifyListeners();
+    _autoLogout();
     return true;
+  }
+
+  Future<Void> logout() async{
+    _token = null;
+    _userId = null;
+    _expiryDate = null;
+    if(_authTimer != null){
+      _authTimer.cancel();
+      _authTimer = null;
+    }
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+  }
+
+  void _autoLogout(){
+    if(_authTimer != null) _authTimer.cancel();
+    final timeToExpiry = _expiryDate.difference(DateTime.now()).inSeconds;
+    _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
   }
 }
